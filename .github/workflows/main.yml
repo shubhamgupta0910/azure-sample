@@ -1,0 +1,54 @@
+name: Build and deploy ASP.NET app
+
+on:
+  push:
+    branches:
+      - main
+
+  pull_request:
+    branches: 
+      - main
+
+  workflow_dispatch:
+
+env:
+  DOTNET_VERSION: '10.0.x'
+  AZURE_WEBAPP_NAME: 'web-app-test'
+  AZURE_WEBAPP_PACKAGEPATH: './publish'
+  
+jobs:
+  builds:
+    runs-on:
+      ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6.0.2
+
+      - name: SETUP .NET CORE
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore Dependencies
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build azure-sample.sln --configuration Release --no-restore 
+
+      - name: Publish
+        run: dotnet publish azure-sample.csproj --configuration Release --no-build --output ${{env.AZURE_WEBAPP_PACKAGEPATH}}
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: azure-sample-publish
+          path: ${{env.AZURE_WEBAPP_PACKAGEPATH}}
+          
+
+      
+         
+
+
+
+    
